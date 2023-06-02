@@ -25,6 +25,7 @@ resource "aws_iam_role" "db-monitor" {
     lookup(var.org_meta, "url"),
     lookup(var.project_meta, "short_name"),
     var.deployment_environment,
+    ""
   ])
 }
 
