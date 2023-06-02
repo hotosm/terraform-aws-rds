@@ -92,9 +92,7 @@ $ terraform plan
 - `vpc_id` - ID of the VPC in which to host resources; Usually obtained from the vpc module.
 - `subnet_ids` - A list of private subnets with which to build the subnet group containing the RDS cluster
 - `database` - A map of database connection parameters
-- `storage` - A map of storage configuration
 - `backup` - A map of backup configuration
-- `monitoring` - A map of monitoring configuration
 - `serverless_capacity` - A map of minimum and maximum APU units to launch the DB cluster with.
 - `deletion_protection` - A boolean value indicating whether the RDS cluster must be protected against accidental deletion; false by default
 - `publicly_accessible` - A boolean flag for whether the database should be publicly accessible; false by default

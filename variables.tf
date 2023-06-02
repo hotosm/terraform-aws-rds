@@ -75,19 +75,6 @@ variable "deletion_protection" {
   default = false
 }
 
-variable "storage" {
-  description = "Storage parameters"
-  type        = map(string)
-
-  default = {
-    type            = "gp2"
-    min_capacity    = "1000"
-    max_capacity    = "5000"
-    throughput_MBps = "125"
-    iops            = "3000"
-  }
-}
-
 variable "backup" {
   description = "Database backups and snapshots"
   type        = map(string)
@@ -96,21 +83,6 @@ variable "backup" {
     retention_days            = 7
     skip_final_snapshot       = true
     final_snapshot_identifier = ""
-  }
-}
-
-variable "monitoring" {
-  description = "Database monitoring and logging"
-  type        = map(string)
-
-  default = {
-    interval_sec                 = 0
-    performance_insights_enabled = true
-  }
-
-  validation {
-    condition     = contains([0, 1, 5, 10, 15, 30, 60], lookup(var.monitoring, "interval_sec"))
-    error_message = "Monitoring interval value is invalid"
   }
 }
 
