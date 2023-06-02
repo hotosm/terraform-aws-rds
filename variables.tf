@@ -75,6 +75,29 @@ variable "deletion_protection" {
   default = false
 }
 
+variable "monitoring" {
+  description = "Database monitoring options; 0 interval means enhanced monitoring is disabled"
+  type = object({
+    interval_seconds                    = number
+    performance_insights_enabled        = bool
+    performance_insights_retention_days = number
+  })
+
+  default = {
+    interval_seconds                    = 0
+    performance_insights_enabled        = true
+    performance_insights_retention_days = 7
+  }
+
+  validation {
+    condition = contains(
+      [0, 1, 5, 10, 15, 30, 60],
+      lookup(var.monitoring, "interval_seconds")
+    )
+    error_message = "Enhanced monitoring interval must be one of 0, 1, 5. 10, 15, 30 or 60 seconds"
+  }
+}
+
 variable "backup" {
   description = "Database backups and snapshots"
   type        = map(string)
@@ -86,7 +109,7 @@ variable "backup" {
   }
 }
 
-variable "publicly_accessible" {
+variable "public_access" {
   description = "Should the database be publicly accessible?"
   type        = bool
 
