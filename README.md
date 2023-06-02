@@ -99,10 +99,24 @@ $ terraform plan
 - `default_tags` - A map of default key-value strings used as resource tags
 - `master_password` - password string supplied by admins; This will be used over auto-generated password. If omitted, auto-generated password will be used.
 
-## License
-
-The project is licensed under GNU LGPL. Please make any modifications to this module public. Read LICENSE, COPYING.LESSER, and COPYING files for license text
-
 ## References
 
 - None.
+
+## Copyright and License texts
+
+The project is licensed under GNU LGPL. Please make any modifications to this module public. Read LICENSE, COPYING.LESSER, and COPYING files for license text
+
+Copyright (C) 2023 eternaltyro
+This file is part of Terraform AWS RDS Module aka terraform-aws-rds project
+
+terraform-aws-rds is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License.
+
+terraform-aws-rds is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+License text can be found in the repository
