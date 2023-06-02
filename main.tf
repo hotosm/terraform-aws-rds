@@ -128,7 +128,7 @@ resource "aws_rds_cluster_instance" "database" {
   db_subnet_group_name = aws_rds_cluster.database.db_subnet_group_name
   apply_immediately    = aws_rds_cluster.database.apply_immediately
 
-  monitoring_role_arn                   = aws_iam_role.db-monitor.arn
+  monitoring_role_arn                   = lookup(var.monitoring, "interval_seconds") == 0 ? null : aws_iam_role.db-monitor.arn
   monitoring_interval                   = lookup(var.monitoring, "interval_seconds")
   performance_insights_enabled          = lookup(var.monitoring, "performance_insights_enabled")
   performance_insights_retention_period = lookup(var.monitoring, "performance_insights_retention_days")
