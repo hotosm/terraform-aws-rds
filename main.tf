@@ -42,7 +42,7 @@ resource "aws_db_subnet_group" "database" {
 }
 
 resource "aws_security_group" "database" {
-  description = "Security group to attach to the Database instance and app services"
+  description = "Connect database instance and app services"
 
   name_prefix = join("-", [
     lookup(var.project_meta, "short_name"),
