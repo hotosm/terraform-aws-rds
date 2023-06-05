@@ -46,7 +46,8 @@ resource "aws_security_group" "database" {
 
   name_prefix = join("-", [
     lookup(var.project_meta, "short_name"),
-    var.deployment_environment
+    var.deployment_environment,
+    "database"
     ]
   )
 
