@@ -122,7 +122,13 @@ resource "aws_rds_cluster" "database" {
 }
 
 resource "aws_rds_cluster_instance" "database" {
-  cluster_identifier   = aws_rds_cluster.database.id
+  cluster_identifier = aws_rds_cluster.database.id
+  identifier_prefix = join("-", [
+    lookup(var.project_meta, "short_name"),
+    var.deployment_environment
+    ]
+  )
+
   engine               = aws_rds_cluster.database.engine
   engine_version       = aws_rds_cluster.database.engine_version
   instance_class       = "db.serverless"
@@ -135,6 +141,10 @@ resource "aws_rds_cluster_instance" "database" {
   performance_insights_retention_period = lookup(var.monitoring, "performance_insights_retention_days")
 
   publicly_accessible = var.public_access
+
+  lifecycle {
+    prevent_destroy = var.deletion_protection
+  }
 }
 
 resource "aws_secretsmanager_secret" "db-credentials" {
