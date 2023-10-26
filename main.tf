@@ -100,6 +100,7 @@ resource "aws_rds_cluster" "database" {
 
   copy_tags_to_snapshot = true
 
+  skip_final_snapshot = lookup(var.backup, "skip_final_snapshot")
   final_snapshot_identifier = join("-", [
     lookup(var.backup, "final_snapshot_identifier"),
     formatdate("YYYY-MM-DD-hh-mm", timestamp())

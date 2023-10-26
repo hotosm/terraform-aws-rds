@@ -104,8 +104,8 @@ variable "backup" {
 
   default = {
     retention_days            = 7
-    skip_final_snapshot       = true
-    final_snapshot_identifier = ""
+    skip_final_snapshot       = false
+    final_snapshot_identifier = "final"
   }
 }
 
