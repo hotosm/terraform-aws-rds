@@ -1,24 +1,20 @@
 variable "org_meta" {
   description = "Organisation domain and top level domain"
-  type        = map(string)
-
-  default = {
-    name       = ""
-    short_name = ""
-    url        = ""
-  }
+  type = object({
+    name       = string
+    short_name = string
+    url        = string
+  })
 }
 
 variable "project_meta" {
   description = "Metadata relating to the project for which the database is being created"
-  type        = map(string)
-
-  default = {
-    name       = ""
-    short_name = ""
-    version    = ""
-    url        = ""
-  }
+  type = object({
+    name       = string
+    short_name = string
+    version    = string
+    url        = string
+  })
 }
 
 variable "deployment_environment" {
@@ -29,6 +25,11 @@ variable "deployment_environment" {
 variable "vpc_id" {
   description = "VPC ID in which to host resources"
   type        = string
+
+  validation {
+    condition     = startswith(var.vpc_id, "vpc-")
+    error_message = "VPC ID must start with `vpc-`"
+  }
 }
 
 variable "subnet_ids" {
@@ -47,20 +48,21 @@ variable "master_password" {
 // NOTE: Password is generated automatically and stored in AWS Secrets Manager
 variable "database" {
   description = "PostgreSQL connection parameters and version."
-  type        = map(string)
-
-  default = {
-    name            = ""
-    admin_user      = ""
-    password_length = 48
-    engine_version  = 13
-    port            = 5432
-  }
+  type = object({
+    name            = string
+    admin_user      = string
+    password_length = number
+    engine_version  = number
+    port            = number
+  })
 }
 
 variable "serverless_capacity" {
   description = "Minimum and maximum APU to assign to the RDS cluster"
-  type        = map(number)
+  type = object({
+    minimum = number
+    maximum = number
+  })
 
   default = {
     minimum = 0.5
@@ -100,7 +102,11 @@ variable "monitoring" {
 
 variable "backup" {
   description = "Database backups and snapshots"
-  type        = map(string)
+  type = object({
+    retention_days            = number
+    skip_final_snapshot       = bool
+    final_snapshot_identifier = string
+  })
 
   default = {
     retention_days            = 7
