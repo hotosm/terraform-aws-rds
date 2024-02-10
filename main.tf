@@ -79,6 +79,9 @@ resource "random_password" "database" {
   special = false
 }
 
+resource "random_pet" "db" {
+}
+
 resource "aws_rds_cluster" "database" {
   cluster_identifier = join("-", [
     lookup(var.project_meta, "short_name"),
@@ -128,7 +131,8 @@ resource "aws_rds_cluster_instance" "database" {
   cluster_identifier = aws_rds_cluster.database.id
   identifier_prefix = join("-", [
     lookup(var.project_meta, "short_name"),
-    var.deployment_environment
+    var.deployment_environment,
+    random_pet.db.id
     ]
   )
 
