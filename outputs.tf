@@ -10,10 +10,6 @@ output "database_security_group_id" {
   value = aws_security_group.database.id
 }
 
-output "database_credentials" {
-  value = aws_secretsmanager_secret_version.db-credentials.arn
-}
-
 output "database_connection_host" {
   value = aws_rds_cluster.database.endpoint
 }
