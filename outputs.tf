@@ -29,3 +29,23 @@ output "database_name" {
 output "database_connection_user" {
   value = aws_rds_cluster.database.master_username
 }
+
+output "database_config_as_ecs_inputs" {
+  description = "This is to easily merge with ECS module"
+  value = {
+      POSTGRES_USER = aws_rds_cluster.database.master_username
+      POSTGRES_ENDPOINT = aws_rds_cluster.database.endpoint
+      POSTGRES_DB = aws_rds_cluster.database.database_name
+      POSTGRES_PORT = aws_rds_cluster.database.port
+  }
+}
+
+output "database_config_as_ecs_secrets_inputs" {
+  description = "This is to easily merge with ECS module"
+  value = [
+        {
+            name      = "POSTGRES_PASSWORD"
+            valueFrom = aws_secretsmanager_secret_version.db-credentials-password.arn
+        }
+    ]
+}

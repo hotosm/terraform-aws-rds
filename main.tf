@@ -156,40 +156,21 @@ resource "aws_rds_cluster_instance" "database" {
   **/
 }
 
-resource "aws_secretsmanager_secret" "db-credentials" {
+resource "aws_secretsmanager_secret" "db-credentials-password" {
   description = "Database connection parameters and access credentials"
 
   name_prefix = join("/", [
     lookup(var.org_meta, "url"),
     lookup(var.project_meta, "short_name"),
     var.deployment_environment,
-    "database"
+    "backend",
+    "POSTGRES_PASSWORD"
     ]
   )
 }
 
-resource "aws_secretsmanager_secret_version" "db-credentials" {
-  secret_id = aws_secretsmanager_secret.db-credentials.id
-  secret_string = jsonencode(
-    zipmap(
-      [
-        "dbinstanceidentifier",
-        "dbname",
-        "engine",
-        "host",
-        "port",
-        "username",
-        "password"
-      ],
-      [
-        aws_rds_cluster.database.id,
-        aws_rds_cluster.database.database_name,
-        aws_rds_cluster.database.engine,
-        aws_rds_cluster.database.endpoint,
-        aws_rds_cluster.database.port,
-        aws_rds_cluster.database.master_username,
-        aws_rds_cluster.database.master_password
-      ]
-    )
-  )
+resource "aws_secretsmanager_secret_version" "db-credentials-password" {
+  secret_id = aws_secretsmanager_secret.db-credentials-password.id
+  secret_string = aws_rds_cluster.database.master_password
 }
+
