@@ -74,6 +74,14 @@ resource "aws_security_group" "database" {
     cidr_blocks = [ data.aws_vpc.selected.cidr_block ]
   }
 
+  ingress {
+    description = "Allow traffic from app server"
+    from_port   = lookup(var.database, "port")
+    to_port     = lookup(var.database, "port")
+    protocol    = "tcp"
+    cidr_blocks = [ data.aws_vpc.selected.cidr_block ]
+  }
+
   egress {
     from_port        = 0
     to_port          = 0
@@ -127,7 +135,7 @@ resource "aws_rds_cluster" "database" {
 
   vpc_security_group_ids = [aws_security_group.database.id]
   db_subnet_group_name   = aws_db_subnet_group.database.name
-  network_type           = "DUAL"
+  network_type           = var.network_type
 
   apply_immediately   = true
   deletion_protection = var.deletion_protection

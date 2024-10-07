@@ -135,3 +135,7 @@ variable "default_tags" {
   }
 }
 
+variable "network_type" {
+  type = string
+  default = "DUAL"
+}
