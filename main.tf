@@ -9,6 +9,11 @@ data "aws_iam_policy_document" "db-monitor-sts" {
   }
 }
 
+# For allowing VPC level database access for containers
+data "aws_vpc" "selected" {
+  id = var.vpc_id  
+}
+
 data "aws_iam_policy" "db-monitor" {
   name = "AmazonRDSEnhancedMonitoringRole"
 }
@@ -59,6 +64,14 @@ resource "aws_security_group" "database" {
     to_port     = lookup(var.database, "port")
     protocol    = "tcp"
     self        = true
+  }
+
+  ingress {
+    description = "Allow traffic from app server"
+    from_port   = lookup(var.database, "port")
+    to_port     = lookup(var.database, "port")
+    protocol    = "tcp"
+    cidr_blocks = [ data.aws_vpc.selected.cidr_block ]
   }
 
   egress {
