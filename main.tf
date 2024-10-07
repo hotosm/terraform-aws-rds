@@ -75,11 +75,11 @@ resource "aws_security_group" "database" {
   }
 
   ingress {
-    description = "Allow traffic from app server"
+    description = "Allow traffic from app server (IPv6)"
     from_port   = lookup(var.database, "port")
     to_port     = lookup(var.database, "port")
     protocol    = "tcp"
-    cidr_blocks = [ data.aws_vpc.selected.cidr_block ]
+    ipv6_cidr_blocks = [ data.aws_vpc.selected.ipv6_cidr_block ]  # Replace with actual IPv6 CIDR block
   }
 
   egress {
