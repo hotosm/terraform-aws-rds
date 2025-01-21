@@ -27,9 +27,9 @@ resource "aws_iam_role" "db-monitor" {
   name_prefix = "db-monitoring"
   path = join("/", [
     "",
-    lookup(var.org_meta, "url"),
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
+    "rds-role",
     ""
   ])
 }
@@ -38,8 +38,9 @@ resource "aws_db_subnet_group" "database" {
   description = "Subnet group to host the database in"
 
   name = join("-", [
-    lookup(var.project_meta, "short_name"),
-    var.deployment_environment
+    lookup(var.project_meta, "name"),
+    var.deployment_environment,
+    "db-subnet"
     ]
   )
 
@@ -50,9 +51,10 @@ resource "aws_security_group" "database" {
   description = "Attach to database instance and app services"
 
   name_prefix = join("-", [
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
-    "database"
+    "rds",
+    "db-subnet",
     ]
   )
 
@@ -105,7 +107,8 @@ resource "random_pet" "db" {
 
 resource "aws_rds_cluster" "database" {
   cluster_identifier = join("-", [
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
+    "rds",
     var.deployment_environment
     ]
   )
@@ -151,8 +154,9 @@ resource "aws_rds_cluster" "database" {
 resource "aws_rds_cluster_instance" "database" {
   cluster_identifier = aws_rds_cluster.database.id
   identifier_prefix = join("-", [
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
+    "rds",
     random_pet.db.id
     ]
   )
@@ -181,10 +185,9 @@ resource "aws_secretsmanager_secret" "db-credentials-password" {
   description = "Database connection parameters and access credentials"
 
   name_prefix = join("/", [
-    lookup(var.org_meta, "url"),
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
-    "backend",
+    "rds",
     "POSTGRES_PASSWORD"
     ]
   )
