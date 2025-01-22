@@ -155,9 +155,7 @@ resource "aws_rds_cluster_instance" "database" {
   cluster_identifier = aws_rds_cluster.database.id
   identifier_prefix = join("-", [
     lookup(var.project_meta, "name"),
-    var.deployment_environment,
-    "rds",
-    random_pet.db.id
+    var.deployment_environment
     ]
   )
 
