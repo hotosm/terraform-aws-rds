@@ -9,6 +9,11 @@ data "aws_iam_policy_document" "db-monitor-sts" {
   }
 }
 
+# For allowing VPC level database access for containers
+data "aws_vpc" "selected" {
+  id = var.vpc_id  
+}
+
 data "aws_iam_policy" "db-monitor" {
   name = "AmazonRDSEnhancedMonitoringRole"
 }
@@ -22,9 +27,9 @@ resource "aws_iam_role" "db-monitor" {
   name_prefix = "db-monitoring"
   path = join("/", [
     "",
-    lookup(var.org_meta, "url"),
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
+    "rds-role",
     ""
   ])
 }
@@ -33,8 +38,9 @@ resource "aws_db_subnet_group" "database" {
   description = "Subnet group to host the database in"
 
   name = join("-", [
-    lookup(var.project_meta, "short_name"),
-    var.deployment_environment
+    lookup(var.project_meta, "name"),
+    var.deployment_environment,
+    "db-subnet"
     ]
   )
 
@@ -45,9 +51,10 @@ resource "aws_security_group" "database" {
   description = "Attach to database instance and app services"
 
   name_prefix = join("-", [
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
-    "database"
+    "rds",
+    "db-subnet",
     ]
   )
 
@@ -59,6 +66,22 @@ resource "aws_security_group" "database" {
     to_port     = lookup(var.database, "port")
     protocol    = "tcp"
     self        = true
+  }
+
+  ingress {
+    description = "Allow traffic from app server"
+    from_port   = lookup(var.database, "port")
+    to_port     = lookup(var.database, "port")
+    protocol    = "tcp"
+    cidr_blocks = [ data.aws_vpc.selected.cidr_block ]
+  }
+
+  ingress {
+    description = "Allow traffic from app server (IPv6)"
+    from_port   = lookup(var.database, "port")
+    to_port     = lookup(var.database, "port")
+    protocol    = "tcp"
+    ipv6_cidr_blocks = [ data.aws_vpc.selected.ipv6_cidr_block ]  # Replace with actual IPv6 CIDR block
   }
 
   egress {
@@ -84,7 +107,8 @@ resource "random_pet" "db" {
 
 resource "aws_rds_cluster" "database" {
   cluster_identifier = join("-", [
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
+    "rds",
     var.deployment_environment
     ]
   )
@@ -114,7 +138,7 @@ resource "aws_rds_cluster" "database" {
 
   vpc_security_group_ids = [aws_security_group.database.id]
   db_subnet_group_name   = aws_db_subnet_group.database.name
-  network_type           = "DUAL"
+  network_type           = var.network_type
 
   apply_immediately   = true
   deletion_protection = var.deletion_protection
@@ -130,9 +154,8 @@ resource "aws_rds_cluster" "database" {
 resource "aws_rds_cluster_instance" "database" {
   cluster_identifier = aws_rds_cluster.database.id
   identifier_prefix = join("-", [
-    lookup(var.project_meta, "short_name"),
-    var.deployment_environment,
-    random_pet.db.id
+    lookup(var.project_meta, "name"),
+    var.deployment_environment
     ]
   )
 
@@ -156,40 +179,20 @@ resource "aws_rds_cluster_instance" "database" {
   **/
 }
 
-resource "aws_secretsmanager_secret" "db-credentials" {
+resource "aws_secretsmanager_secret" "db-credentials-password" {
   description = "Database connection parameters and access credentials"
 
   name_prefix = join("/", [
-    lookup(var.org_meta, "url"),
-    lookup(var.project_meta, "short_name"),
+    lookup(var.project_meta, "name"),
     var.deployment_environment,
-    "database"
+    "rds",
+    "POSTGRES_PASSWORD"
     ]
   )
 }
 
-resource "aws_secretsmanager_secret_version" "db-credentials" {
-  secret_id = aws_secretsmanager_secret.db-credentials.id
-  secret_string = jsonencode(
-    zipmap(
-      [
-        "dbinstanceidentifier",
-        "dbname",
-        "engine",
-        "host",
-        "port",
-        "username",
-        "password"
-      ],
-      [
-        aws_rds_cluster.database.id,
-        aws_rds_cluster.database.database_name,
-        aws_rds_cluster.database.engine,
-        aws_rds_cluster.database.endpoint,
-        aws_rds_cluster.database.port,
-        aws_rds_cluster.database.master_username,
-        aws_rds_cluster.database.master_password
-      ]
-    )
-  )
+resource "aws_secretsmanager_secret_version" "db-credentials-password" {
+  secret_id = aws_secretsmanager_secret.db-credentials-password.id
+  secret_string = aws_rds_cluster.database.master_password
 }
+
